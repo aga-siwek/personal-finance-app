@@ -82,6 +82,14 @@ including hover and modal states). The build must match this design 1:1.
   - `axios` for HTTP calls, JWT attached via an `Authorization: Bearer`
     header (token in-memory + `localStorage`, mirroring the mood-track
     auth slice)
+  - **API base URL lives in exactly one place**: a single env-driven
+    constant (e.g. `src/lib/api/config.ts` exporting `API_BASE_URL` from
+    `import.meta.env.VITE_API_URL`, defaulting to `http://localhost:5000`
+    for local dev against the backend). The shared axios instance is built
+    from this constant; every thunk imports that instance — never a raw
+    `axios.get('http://...')` with the URL inlined. This makes switching
+    from localhost to a deployed backend a one-line/env-var change, not a
+    find-and-replace across the codebase.
 - **Styling**: Tailwind CSS v4 (`@tailwindcss/vite`) for layout, spacing,
   typography, and one-off utility styling.
 - **Component library**: **shadcn/ui is required for interactive

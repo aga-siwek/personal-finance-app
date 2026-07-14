@@ -195,9 +195,39 @@ by Tailwind breakpoints, not JS device/user-agent detection:
    of `docs/preview/`; should be confirmed against a style-guide asset if
    one becomes available (not blocking — implementation starts from the
    observed palette in `CLAUDE.md`).
-2. **Transactions pagination page size** — the design shows 5 numbered
-   pages for the sample dataset; confirm the backend's actual page size/
-   query params when building `/transactions`.
-3. **Sign-up → post-registration flow** — whether the backend logs the user
-   in immediately on signup or requires a separate login step; confirm
-   against the backend's `/auth/signup` response when building §6.2.
+2. **Transactions pagination page size** — mechanism confirmed (`page` +
+   `per_page` query params on `GET /transactions`, see §10), but the actual
+   default/max `per_page` value is still TBD; confirm when building
+   `/transactions`.
+3. **Sign-up → post-registration flow** — `POST /auth/signup` and
+   `POST /auth/login` are separate endpoints (see §10); confirm whether
+   signup's response already includes a usable token or whether the
+   frontend must call `/auth/login` right after, when building §6.2.
+4. **Password reset** — `POST /auth/reset-password` exists as a route but
+   is not functionally wired up on the backend yet (no email provider).
+   Not blocking: the reviewed Login design has no "forgot password" link,
+   so v1 frontend doesn't need this endpoint. Revisit if a future design
+   iteration adds one.
+
+## 10. Backend API status
+
+Snapshot of what the backend actually has implemented (source: backend
+build report, 2026-07-14) — kept here so frontend work always targets real
+endpoints, not planned ones. Update this section as the backend evolves;
+it is a status snapshot, not a spec (the backend PRD/CLAUDE.md are the
+source of truth for behavior).
+
+Legend: 🟢 implemented & tested · 🔒 requires JWT · 👑 requires `is_admin` ·
+⚪ deferred
+
+| Domain | Endpoints | Notes |
+|---|---|---|
+| Auth | `POST /auth/signup`, `/login` 🟢 · `POST /auth/logout`, `/refresh` 🔒🟢 · `POST /auth/reset-password` — route exists, ⚪ not wired (no email provider) | See open question 4 |
+| Users | `GET/PUT /users/me` 🔒🟢 · `PUT /users/me/password` 🔒🟢 · `DELETE /users/me` 🔒🟢 · `GET/PUT /users/me/settings` 🔒🟢 | |
+| Categories | `GET/POST /categories` 🔒🟢 · `GET/PUT/DELETE /categories/:id` 🔒🟢 | Seeded on signup per backend PRD §5.2 |
+| Transactions | `GET /transactions?page&per_page&search&sort&category_id` 🔒🟢 · `POST /transactions` 🔒🟢 · `GET/DELETE /transactions/:id` 🔒🟢 | Filter dropdown in §6.4 sends `category_id`, not a name |
+| Budgets | `GET/POST /budgets` 🔒🟢 · `GET/PUT/DELETE /budgets/:id` 🔒🟢 | |
+| Pots | `GET/POST /pots` 🔒🟢 · `GET/PUT/DELETE /pots/:id` 🔒🟢 · `POST /pots/:id/add`, `/withdraw` 🔒🟢 | Atomic, row-locked on the backend — frontend sends one amount, doesn't compute the result |
+| Recurring Bills | `GET /recurring-bills?search&sort` 🔒🟢 · `POST /recurring-bills` 🔒🟢 · `GET/PUT/DELETE /recurring-bills/:id` 🔒🟢 | `paid`/`upcoming`/`due_soon` status is server-derived (3-day due-soon threshold) |
+| Overview | `GET /overview` 🔒🟢 | Single round trip, per §6.3 |
+| Admin | Full `/admin/*` surface (users, transactions, categories, budgets, pots, recurring-bills, reports) 👑🟢 | Implemented backend-side; **not surfaced in v1 frontend** per this PRD's non-goals (§3) |
