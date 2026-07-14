@@ -8,6 +8,7 @@ See [PRD](./docs/PRD.md) for product requirements.
 
 ## General conventions
 - Commit messages: "feat:", "fix:", "docs:", "test:" prefixes
+- After committing, push to `origin/<branch>` as well — don't leave commits local-only unless explicitly told to hold off
 - Code style: Black (Python), Prettier (JS)
 - Never commit .env files or secrets
 - All database changes require migrations
@@ -22,6 +23,8 @@ and specific message to the console describing exactly what needs to be done
 - **Build component by component**, not the whole app at once — each component gets its own tests + migration, then a commit, before moving to the next
 - **Build order** (dependency-driven): Auth/User (JWT + isolation foundation) → Categories → Transactions → Budgets/Pots/Recurring Bills → Receipt Scanner (depends on Transactions) → Overview (aggregates everything) → Admin
 - **Plan Mode first**: before starting each new component (not every small edit within it), go through Plan Mode to verify connections/dependencies with the rest of the system before writing code
+- **Never move from planning into actual code execution without the user's explicit, separate go-ahead.** Approving a plan is not blanket approval for everything that follows from it — if execution will span multiple stages/passes (e.g. a foundational pass plus a follow-up pass), check in before starting execution at all, don't chain straight from plan approval into open-ended implementation.
+- **Run the `/security-check` skill after implementing any larger section** (a full component, or a grouped multi-component stage) — not just an ad-hoc manual review. Run it before considering that section done/reportable, in addition to (not instead of) the usual tests + migration + commit per component.
 - **Model routing**:
   - **Opus** — Plan Mode reviews, and first-pass foundational work: initial DB models, database connection/config setup, core code structure for a new domain, **and auth/JWT logic + permission decorators** (`@require_admin`, ownership checks) — mistakes here are as costly as a bad schema and harder to catch later
   - **Sonnet** (default) — the rest of implementation work once a component's foundation exists, plus code review
@@ -131,174 +134,174 @@ frontendmentor_personal_finance_backend/
 ## API Endpoints
 
 ### Authentication (Public)
-POST /api/auth/signup # Create new user
-POST /api/auth/login # Get JWT token
-POST /api/auth/logout # Invalidate token
-POST /api/auth/refresh # Refresh expired token
-POST /api/auth/reset-password # Reset password
+POST /auth/signup # Create new user
+POST /auth/login # Get JWT token
+POST /auth/logout # Invalidate token
+POST /auth/refresh # Refresh expired token
+POST /auth/reset-password # Reset password
 
 ### User Profile (Auth Required)
-GET /api/users/me # Get current user profile
-PUT /api/users/me # Update current user profile
-PUT /api/users/me/password # Change password
-DELETE /api/users/me # Delete own account
-GET /api/users/me/settings # Get user settings
-PUT /api/users/me/settings # Update user settings
+GET /users/me # Get current user profile
+PUT /users/me # Update current user profile
+PUT /users/me/password # Change password
+DELETE /users/me # Delete own account
+GET /users/me/settings # Get user settings
+PUT /users/me/settings # Update user settings
 
 ### Overview (Auth Required)
-GET /api/overview # Aggregated dashboard data (balance, income, expenses, pots, budgets, latest transactions, bill summary)
+GET /overview # Aggregated dashboard data (balance, income, expenses, pots, budgets, latest transactions, bill summary)
 
 ### Transactions (Auth Required - Own Data Only)
-GET /api/transactions # Get own transactions
-POST /api/transactions # Create transaction
-GET /api/transactions/:id # Get own transaction
-DELETE /api/transactions/:id # Delete own transaction
+GET /transactions # Get own transactions
+POST /transactions # Create transaction
+GET /transactions/:id # Get own transaction
+DELETE /transactions/:id # Delete own transaction
 
 ### Categories (Auth Required - Own Data Only)
-GET /api/categories # Get own categories
-POST /api/categories # Create category
-GET /api/categories/:id # Get own category
-PUT /api/categories/:id # Update own category
-DELETE /api/categories/:id # Delete own category
+GET /categories # Get own categories
+POST /categories # Create category
+GET /categories/:id # Get own category
+PUT /categories/:id # Update own category
+DELETE /categories/:id # Delete own category
 
 ### Budgets (Auth Required - Own Data Only)
-GET /api/budgets # Get own budgets
-POST /api/budgets # Create budget
-GET /api/budgets/:id # Get own budget
-PUT /api/budgets/:id # Update own budget
-DELETE /api/budgets/:id # Delete own budget
+GET /budgets # Get own budgets
+POST /budgets # Create budget
+GET /budgets/:id # Get own budget
+PUT /budgets/:id # Update own budget
+DELETE /budgets/:id # Delete own budget
 
 ### Pots (Auth Required - Own Data Only)
-GET /api/pots # Get own pots
-POST /api/pots # Create pot
-GET /api/pots/:id # Get own pot
-PUT /api/pots/:id # Update own pot
-DELETE /api/pots/:id # Delete own pot
-POST /api/pots/:id/add # Move money from balance into pot
-POST /api/pots/:id/withdraw # Move money from pot back to balance
+GET /pots # Get own pots
+POST /pots # Create pot
+GET /pots/:id # Get own pot
+PUT /pots/:id # Update own pot
+DELETE /pots/:id # Delete own pot
+POST /pots/:id/add # Move money from balance into pot
+POST /pots/:id/withdraw # Move money from pot back to balance
 
 ### Recurring Bills (Auth Required - Own Data Only)
-GET /api/recurring-bills # Get own recurring bills
-POST /api/recurring-bills # Create recurring bill
-GET /api/recurring-bills/:id # Get own recurring bill
-PUT /api/recurring-bills/:id # Update own recurring bill
-DELETE /api/recurring-bills/:id # Delete own recurring bill
+GET /recurring-bills # Get own recurring bills
+POST /recurring-bills # Create recurring bill
+GET /recurring-bills/:id # Get own recurring bill
+PUT /recurring-bills/:id # Update own recurring bill
+DELETE /recurring-bills/:id # Delete own recurring bill
 
 ### Receipt Scanner (Auth Required - Own Data Only)
-GET /api/receipts/scans # Get own scan history
-POST /api/receipts/scan # Upload image and scan
-GET /api/receipts/scans/:id # Get own scan details
-POST /api/receipts/scans/:id/create-transaction # Create transaction from scan
-DELETE /api/receipts/scans/:id # Delete own scan
+GET /receipts/scans # Get own scan history
+POST /receipts/scan # Upload image and scan
+GET /receipts/scans/:id # Get own scan details
+POST /receipts/scans/:id/create-transaction # Create transaction from scan
+DELETE /receipts/scans/:id # Delete own scan
 
 ### Admin - Users (Admin Only)
-GET /api/admin/users # List all users
-GET /api/admin/users/:id # Get user details
-PUT /api/admin/users/:id # Update user
-DELETE /api/admin/users/:id # Delete user account
-POST /api/admin/users/:id/promote # Promote user to admin
-POST /api/admin/users/:id/demote # Demote user from admin
+GET /admin/users # List all users
+GET /admin/users/:id # Get user details
+PUT /admin/users/:id # Update user
+DELETE /admin/users/:id # Delete user account
+POST /admin/users/:id/promote # Promote user to admin
+POST /admin/users/:id/demote # Demote user from admin
 
 ### Admin - Transactions (Admin Only)
-GET /api/admin/transactions/all # View all transactions (with filters)
-GET /api/admin/transactions/:id # Get transaction details
-DELETE /api/admin/transactions/:id # Delete transaction
+GET /admin/transactions/all # View all transactions (with filters)
+GET /admin/transactions/:id # Get transaction details
+DELETE /admin/transactions/:id # Delete transaction
 
 ### Admin - Categories (Admin Only)
-GET /api/admin/categories/all # View all categories
-GET /api/admin/categories/:id # Get category details
+GET /admin/categories/all # View all categories
+GET /admin/categories/:id # Get category details
 
 ### Admin - Budgets (Admin Only)
-GET /api/admin/budgets/all # View all budgets
-GET /api/admin/budgets/:id # Get budget details
+GET /admin/budgets/all # View all budgets
+GET /admin/budgets/:id # Get budget details
 
 ### Admin - Pots (Admin Only)
-GET /api/admin/pots/all # View all pots
-GET /api/admin/pots/:id # Get pot details
+GET /admin/pots/all # View all pots
+GET /admin/pots/:id # Get pot details
 
 ### Admin - Recurring Bills (Admin Only)
-GET /api/admin/recurring-bills/all # View all recurring bills
-GET /api/admin/recurring-bills/:id # Get recurring bill details
+GET /admin/recurring-bills/all # View all recurring bills
+GET /admin/recurring-bills/:id # Get recurring bill details
 
 ### Admin - Receipts (Admin Only)
-GET /api/admin/receipts/all # View all receipt scans
-GET /api/admin/receipts/:id # Get receipt scan details
+GET /admin/receipts/all # View all receipt scans
+GET /admin/receipts/:id # Get receipt scan details
 
 ### Admin - Reports (Admin Only)
-GET /api/admin/reports # Generate system reports
-GET /api/admin/reports/transactions # Transaction statistics
-GET /api/admin/reports/users # User statistics
+GET /admin/reports # Generate system reports
+GET /admin/reports/transactions # Transaction statistics
+GET /admin/reports/users # User statistics
 
 ## Permission Levels
 
 ### Public (No Auth Required)
-- POST /api/auth/signup
-- POST /api/auth/login
-- POST /api/auth/reset-password
+- POST /auth/signup
+- POST /auth/login
+- POST /auth/reset-password
 
 ### User (Auth Required - Own Data Only)
-- GET /api/users/me
-- PUT /api/users/me
-- PUT /api/users/me/password
-- DELETE /api/users/me
-- GET /api/users/me/settings
-- PUT /api/users/me/settings
-- GET /api/overview
-- GET /api/transactions
-- POST /api/transactions
-- GET /api/transactions/:id
-- DELETE /api/transactions/:id
-- GET /api/categories
-- POST /api/categories
-- GET /api/categories/:id
-- PUT /api/categories/:id
-- DELETE /api/categories/:id
-- GET /api/budgets
-- POST /api/budgets
-- GET /api/budgets/:id
-- PUT /api/budgets/:id
-- DELETE /api/budgets/:id
-- GET /api/pots
-- POST /api/pots
-- GET /api/pots/:id
-- PUT /api/pots/:id
-- DELETE /api/pots/:id
-- POST /api/pots/:id/add
-- POST /api/pots/:id/withdraw
-- GET /api/recurring-bills
-- POST /api/recurring-bills
-- GET /api/recurring-bills/:id
-- PUT /api/recurring-bills/:id
-- DELETE /api/recurring-bills/:id
-- GET /api/receipts/scans
-- POST /api/receipts/scan
-- GET /api/receipts/scans/:id
-- POST /api/receipts/scans/:id/create-transaction
-- DELETE /api/receipts/scans/:id
+- GET /users/me
+- PUT /users/me
+- PUT /users/me/password
+- DELETE /users/me
+- GET /users/me/settings
+- PUT /users/me/settings
+- GET /overview
+- GET /transactions
+- POST /transactions
+- GET /transactions/:id
+- DELETE /transactions/:id
+- GET /categories
+- POST /categories
+- GET /categories/:id
+- PUT /categories/:id
+- DELETE /categories/:id
+- GET /budgets
+- POST /budgets
+- GET /budgets/:id
+- PUT /budgets/:id
+- DELETE /budgets/:id
+- GET /pots
+- POST /pots
+- GET /pots/:id
+- PUT /pots/:id
+- DELETE /pots/:id
+- POST /pots/:id/add
+- POST /pots/:id/withdraw
+- GET /recurring-bills
+- POST /recurring-bills
+- GET /recurring-bills/:id
+- PUT /recurring-bills/:id
+- DELETE /recurring-bills/:id
+- GET /receipts/scans
+- POST /receipts/scan
+- GET /receipts/scans/:id
+- POST /receipts/scans/:id/create-transaction
+- DELETE /receipts/scans/:id
 
 ### Admin Only (Requires is_admin=true)
-- GET /api/admin/users
-- GET /api/admin/users/:id
-- PUT /api/admin/users/:id
-- DELETE /api/admin/users/:id
-- POST /api/admin/users/:id/promote
-- POST /api/admin/users/:id/demote
-- GET /api/admin/transactions/all
-- GET /api/admin/transactions/:id
-- DELETE /api/admin/transactions/:id
-- GET /api/admin/categories/all
-- GET /api/admin/categories/:id
-- GET /api/admin/budgets/all
-- GET /api/admin/budgets/:id
-- GET /api/admin/pots/all
-- GET /api/admin/pots/:id
-- GET /api/admin/recurring-bills/all
-- GET /api/admin/recurring-bills/:id
-- GET /api/admin/receipts/all
-- GET /api/admin/receipts/:id
-- GET /api/admin/reports
-- GET /api/admin/reports/transactions
-- GET /api/admin/reports/users
+- GET /admin/users
+- GET /admin/users/:id
+- PUT /admin/users/:id
+- DELETE /admin/users/:id
+- POST /admin/users/:id/promote
+- POST /admin/users/:id/demote
+- GET /admin/transactions/all
+- GET /admin/transactions/:id
+- DELETE /admin/transactions/:id
+- GET /admin/categories/all
+- GET /admin/categories/:id
+- GET /admin/budgets/all
+- GET /admin/budgets/:id
+- GET /admin/pots/all
+- GET /admin/pots/:id
+- GET /admin/recurring-bills/all
+- GET /admin/recurring-bills/:id
+- GET /admin/receipts/all
+- GET /admin/receipts/:id
+- GET /admin/reports
+- GET /admin/reports/transactions
+- GET /admin/reports/users
 
 
 ## Common tasks
@@ -316,7 +319,9 @@ GET /api/admin/reports/users # User statistics
 - Reset database: `docker-compose down -v && docker-compose up`
 
 ## Database
-- PostgreSQL 15+
+- PostgreSQL 15+ is the target production/eventual dev database
+- **Phased rollout**: local development starts on SQLite (`DATABASE_URL=sqlite:///...`) while early components (starting with Auth/User) are built; the switch to Postgres happens explicitly at a later stage, not from day one
+- **Switching must be config-only**: when the Postgres switch happens, only `DATABASE_URL` (and secret keys, e.g. `JWT_SECRET_KEY`/`SECRET_KEY`) may need to change — no code, model, or migration changes. This means: avoid Postgres-specific SQLAlchemy types/features (e.g. `JSONB`, `ARRAY`, dialect-specific functions) until that switch is made; stick to portable SQLAlchemy column types
 - Connection string in .env: DATABASE_URL
 - Migrations auto-run on container startup
 - Always write down migrations for schema changes

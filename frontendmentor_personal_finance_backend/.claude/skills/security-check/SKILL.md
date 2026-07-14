@@ -37,11 +37,11 @@ stack (see `CLAUDE.md` for the planned route/service/schema layout).
   planned structure) and any image-processing step before the Vision API
   call.
 - **Broken authentication / access control.** Every route must require JWT
-  auth except the explicitly public ones (`/api/auth/signup`,
-  `/api/auth/login`, `/api/auth/reset-password`). Every fetch/update/delete
+  auth except the explicitly public ones (`/auth/signup`,
+  `/auth/login`, `/auth/reset-password`). Every fetch/update/delete
   of a user-owned resource (transaction, category, budget, recipe scan) must
   filter by the authenticated user's id — never trust an `:id` in the URL
-  alone. Every `/api/admin/*` route must be behind the admin-only decorator.
+  alone. Every `/admin/*` route must be behind the admin-only decorator.
 - **Hard-coded credentials (CWE-798).** Grep for API keys, JWT secrets,
   DB passwords, or the Claude API key as literals in source. They must come
   from `.env` / `config.py` env vars, never be committed, and never be

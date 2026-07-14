@@ -45,7 +45,7 @@ spent/remaining, pot totals) — the frontend never computes these itself.
   pots, recurring bills, and receipt scans. No visibility into other
   users' data.
 - **Admin** — read access across all users' data plus user management
-  (`/api/admin/*`), for support/ops. Not a money-management persona.
+  (`/admin/*`), for support/ops. Not a money-management persona.
 
 ## 5. Functional requirements by domain
 
