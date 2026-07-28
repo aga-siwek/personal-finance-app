@@ -1,15 +1,26 @@
 import { cn } from "@/lib/utils";
+import logoLarge from "@/assets/images/logo-large.svg";
+import logoSmall from "@/assets/images/logo-small.svg";
 
 /**
- * The "finance" wordmark. Text-based stand-in until the Frontend Mentor
- * logo SVGs are added; colour is inherited so it works on both the dark
- * nav/auth surfaces and light backgrounds.
+ * The official Frontend Mentor "finance" logo. `large` is the full wordmark
+ * (used expanded); `small` is the icon-only mark (used in the collapsed
+ * sidebar rail). Both SVGs are white, so they sit on the dark nav/auth
+ * surfaces the logo always appears on.
  */
-function Logo({ className }: { className?: string }) {
+function Logo({
+  variant = "large",
+  className,
+}: {
+  variant?: "large" | "small";
+  className?: string;
+}) {
   return (
-    <span className={cn("text-2xl font-bold tracking-tight lowercase", className)}>
-      finance
-    </span>
+    <img
+      src={variant === "small" ? logoSmall : logoLarge}
+      alt="finance"
+      className={cn("h-auto", className)}
+    />
   );
 }
 

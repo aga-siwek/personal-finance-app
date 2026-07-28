@@ -17,8 +17,10 @@ dist-ssr
 .env.*
 !.env.example
 
-# QA artifacts — regenerable via the /manual-tester skill
-docs/qa-reports/
+# QA artifacts — screenshots/raw data are regenerable via the /manual-tester
+# skill, so only the written report.md is tracked.
+docs/qa-reports/**/*.png
+docs/qa-reports/**/raw-results.json
 
 # Editor directories and files
 .vscode/*

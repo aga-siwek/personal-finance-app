@@ -60,13 +60,15 @@ renders what the API returns and sends user actions back to it.
 One app shell wraps every authenticated screen. The nav pattern is driven
 by Tailwind breakpoints, not JS device/user-agent detection:
 
-- **Desktop & tablet**: a dark, collapsible left sidebar (wordmark
+- **Desktop (≥ lg, 1024px)**: a dark, collapsible left sidebar (wordmark
   "finance" + Overview/Transactions/Budgets/Pots/Recurring Bills + a
   "Minimize Menu" toggle at the bottom). Collapsing swaps labelled nav
-  items for icon-only.
-- **Mobile**: the sidebar collapses into a fixed bottom icon bar (five
-  icons: Overview/Transactions/Budgets/Pots/Recurring Bills), matching
-  `docs/preview/Mobile - Home.jpg`.
+  items for an icon-only rail.
+- **Tablet (md–lg, 768–1023px)**: a fixed dark bottom bar with the five
+  nav items shown as **icon + label**, matching
+  `docs/preview/Tablet - Home.jpg`.
+- **Mobile (< md)**: the same fixed bottom bar, but **icons only** (no
+  labels), matching `docs/preview/Mobile - Home.jpg`.
 - Unauthenticated routes (`/login`, `/signup`) render outside the app
   shell, full-bleed, with the dark illustrated panel shown on tablet/
   desktop (`Desktop - Login - Bonus.png`) collapsing to just the form on

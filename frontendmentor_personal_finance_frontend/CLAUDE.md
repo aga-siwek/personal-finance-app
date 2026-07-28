@@ -39,8 +39,9 @@ including hover and modal states). The build must match this design 1:1.
   `docs/qa-reports/`) so failures are visible immediately after a bigger
   rollout, mirroring the backend's `/security-check`-after-stages rule.
 - **Build order** (dependency-driven, mobile-first): Auth (Login/Sign Up) →
-  App shell & Navigation (responsive sidebar ↔ bottom-nav, protected
-  routing) → Overview → Transactions → Budgets → Pots → Recurring Bills.
+  App shell & Navigation (desktop sidebar ≥lg ↔ mobile/tablet bottom bar,
+  protected routing) → Overview → Transactions → Budgets → Pots → Recurring
+  Bills.
   Receipt Scanner and Admin are **not built on the frontend** — see
   "Non-goals" in the PRD.
 - **Plan Mode first**: before starting each new component (not every small

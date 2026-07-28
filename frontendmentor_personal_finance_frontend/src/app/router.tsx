@@ -1,15 +1,17 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import ProtectedRoute from "@/components/routing/ProtectedRoute";
 import PublicRoute from "@/components/routing/PublicRoute";
+import ScreenPlaceholder from "@/components/routing/ScreenPlaceholder";
+import AppShell from "@/components/layout/AppShell";
 import Login from "@/features/auth/Login";
 import SignUp from "@/features/auth/SignUp";
 import OverviewPlaceholder from "@/features/overview/OverviewPlaceholder";
 
 /**
- * App routes. Public auth screens live under PublicRoute; everything else is
- * behind ProtectedRoute. The protected `/` currently renders a placeholder —
- * later stages add the app-shell child routes (transactions, budgets, pots,
- * recurring-bills).
+ * App routes. Public auth screens live under PublicRoute; the authenticated
+ * area lives under ProtectedRoute → AppShell (the nav layout). `/` is the
+ * (placeholder) Overview; the other four render placeholders until their real
+ * screens are built in later components.
  */
 export const router = createBrowserRouter([
   {
@@ -21,7 +23,24 @@ export const router = createBrowserRouter([
   },
   {
     element: <ProtectedRoute />,
-    children: [{ path: "/", element: <OverviewPlaceholder /> }],
+    children: [
+      {
+        element: <AppShell />,
+        children: [
+          { path: "/", element: <OverviewPlaceholder /> },
+          {
+            path: "/transactions",
+            element: <ScreenPlaceholder title="Transactions" />,
+          },
+          { path: "/budgets", element: <ScreenPlaceholder title="Budgets" /> },
+          { path: "/pots", element: <ScreenPlaceholder title="Pots" /> },
+          {
+            path: "/recurring-bills",
+            element: <ScreenPlaceholder title="Recurring Bills" />,
+          },
+        ],
+      },
+    ],
   },
   { path: "*", element: <Navigate to="/" replace /> },
 ]);
