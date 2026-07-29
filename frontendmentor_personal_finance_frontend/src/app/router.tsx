@@ -5,13 +5,13 @@ import ScreenPlaceholder from "@/components/routing/ScreenPlaceholder";
 import AppShell from "@/components/layout/AppShell";
 import Login from "@/features/auth/Login";
 import SignUp from "@/features/auth/SignUp";
-import OverviewPlaceholder from "@/features/overview/OverviewPlaceholder";
+import OverviewPage from "@/features/overview/OverviewPage";
 
 /**
  * App routes. Public auth screens live under PublicRoute; the authenticated
  * area lives under ProtectedRoute → AppShell (the nav layout). `/` is the
- * (placeholder) Overview; the other four render placeholders until their real
- * screens are built in later components.
+ * Overview; the other four render placeholders until their real screens are
+ * built in later components.
  */
 export const router = createBrowserRouter([
   {
@@ -27,7 +27,7 @@ export const router = createBrowserRouter([
       {
         element: <AppShell />,
         children: [
-          { path: "/", element: <OverviewPlaceholder /> },
+          { path: "/", element: <OverviewPage /> },
           {
             path: "/transactions",
             element: <ScreenPlaceholder title="Transactions" />,
