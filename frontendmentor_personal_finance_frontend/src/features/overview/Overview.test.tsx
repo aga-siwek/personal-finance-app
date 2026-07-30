@@ -45,6 +45,7 @@ const overview: OverviewResponse = {
       { id: 1, category_id: 14, max_spend: 7500, theme: "#f2cdac", spent: 8050, remaining: -550, created_at: "", updated_at: "" },
       { id: 2, category_id: 12, max_spend: 75000, theme: "#82c9d7", spent: 46500, remaining: 28500, created_at: "", updated_at: "" },
     ],
+    unbudgeted: [{ category_id: 13, spent: 4500 }],
   },
   latest_transactions: [
     tx({ id: 1, recipient_name: "Emma Richardson", amount: 7550 }),
@@ -53,7 +54,7 @@ const overview: OverviewResponse = {
   recurring_bills: { paid: 2, due_soon: 1, upcoming: 3 },
 };
 
-const categoryNames = { 12: "Bills", 14: "Dining Out" };
+const categoryNames = { 12: "Bills", 13: "Groceries", 14: "Dining Out" };
 
 describe("SummaryCards", () => {
   it("renders the three headline figures", () => {
@@ -104,6 +105,15 @@ describe("BudgetsSummaryCard", () => {
     expect(screen.getByText(/of \$825 limit/)).toBeInTheDocument();
     expect(screen.getByText("Dining Out")).toBeInTheDocument();
     expect(screen.getByText("$75.00")).toBeInTheDocument();
+  });
+
+  it("lists categories with spending but no budget, tagged 'No budget'", () => {
+    renderWithProviders(
+      <BudgetsSummaryCard budgets={overview.budgets} categoryNames={categoryNames} />,
+    );
+    expect(screen.getByText("Groceries")).toBeInTheDocument();
+    expect(screen.getByText("No budget")).toBeInTheDocument();
+    expect(screen.getByText("$45.00")).toBeInTheDocument();
   });
 });
 

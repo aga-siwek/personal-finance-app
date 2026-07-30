@@ -73,6 +73,9 @@ export interface OverviewResponse {
   budgets: {
     total_count: number;
     top: BudgetSummaryDTO[];
+    /** Categories that have spending but no budget (integer cents). Optional
+     * so the UI stays safe against an older backend that omits it. */
+    unbudgeted?: { category_id: number; spent: number }[];
   };
   latest_transactions: TransactionDTO[];
   recurring_bills: {
