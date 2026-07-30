@@ -8,6 +8,7 @@ import SignUp from "@/features/auth/SignUp";
 import OverviewPage from "@/features/overview/OverviewPage";
 import TransactionsPage from "@/features/transactions/TransactionsPage";
 import BudgetsPage from "@/features/budgets/BudgetsPage";
+import PotsPage from "@/features/pots/PotsPage";
 
 /**
  * App routes. Public auth screens live under PublicRoute; the authenticated
@@ -32,7 +33,7 @@ export const router = createBrowserRouter([
           { path: "/", element: <OverviewPage /> },
           { path: "/transactions", element: <TransactionsPage /> },
           { path: "/budgets", element: <BudgetsPage /> },
-          { path: "/pots", element: <ScreenPlaceholder title="Pots" /> },
+          { path: "/pots", element: <PotsPage /> },
           {
             path: "/recurring-bills",
             element: <ScreenPlaceholder title="Recurring Bills" />,

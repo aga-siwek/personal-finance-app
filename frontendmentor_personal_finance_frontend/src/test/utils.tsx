@@ -9,6 +9,7 @@ import overviewReducer from "@/features/overview/overviewSlice";
 import categoriesReducer from "@/features/categories/categoriesSlice";
 import transactionsReducer from "@/features/transactions/transactionsSlice";
 import budgetsReducer from "@/features/budgets/budgetsSlice";
+import potsReducer from "@/features/pots/potsSlice";
 
 /** Render a component inside a fresh Redux store + router for tests. */
 export function renderWithProviders(
@@ -23,6 +24,7 @@ export function renderWithProviders(
       categories: categoriesReducer,
       transactions: transactionsReducer,
       budgets: budgetsReducer,
+      pots: potsReducer,
     },
   });
   return {

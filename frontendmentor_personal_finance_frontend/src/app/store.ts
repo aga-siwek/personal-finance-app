@@ -6,6 +6,7 @@ import overviewReducer from "@/features/overview/overviewSlice";
 import categoriesReducer from "@/features/categories/categoriesSlice";
 import transactionsReducer from "@/features/transactions/transactionsSlice";
 import budgetsReducer from "@/features/budgets/budgetsSlice";
+import potsReducer from "@/features/pots/potsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     categories: categoriesReducer,
     transactions: transactionsReducer,
     budgets: budgetsReducer,
+    pots: potsReducer,
   },
 });
 
