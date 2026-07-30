@@ -7,6 +7,7 @@ import categoriesReducer from "@/features/categories/categoriesSlice";
 import transactionsReducer from "@/features/transactions/transactionsSlice";
 import budgetsReducer from "@/features/budgets/budgetsSlice";
 import potsReducer from "@/features/pots/potsSlice";
+import recurringBillsReducer from "@/features/recurring-bills/recurringBillsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
     transactions: transactionsReducer,
     budgets: budgetsReducer,
     pots: potsReducer,
+    recurringBills: recurringBillsReducer,
   },
 });
 

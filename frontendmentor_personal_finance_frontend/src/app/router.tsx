@@ -1,7 +1,6 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import ProtectedRoute from "@/components/routing/ProtectedRoute";
 import PublicRoute from "@/components/routing/PublicRoute";
-import ScreenPlaceholder from "@/components/routing/ScreenPlaceholder";
 import AppShell from "@/components/layout/AppShell";
 import Login from "@/features/auth/Login";
 import SignUp from "@/features/auth/SignUp";
@@ -9,12 +8,11 @@ import OverviewPage from "@/features/overview/OverviewPage";
 import TransactionsPage from "@/features/transactions/TransactionsPage";
 import BudgetsPage from "@/features/budgets/BudgetsPage";
 import PotsPage from "@/features/pots/PotsPage";
+import RecurringBillsPage from "@/features/recurring-bills/RecurringBillsPage";
 
 /**
  * App routes. Public auth screens live under PublicRoute; the authenticated
- * area lives under ProtectedRoute → AppShell (the nav layout). `/` is the
- * Overview; the other four render placeholders until their real screens are
- * built in later components.
+ * area lives under ProtectedRoute → AppShell (the nav layout).
  */
 export const router = createBrowserRouter([
   {
@@ -34,10 +32,7 @@ export const router = createBrowserRouter([
           { path: "/transactions", element: <TransactionsPage /> },
           { path: "/budgets", element: <BudgetsPage /> },
           { path: "/pots", element: <PotsPage /> },
-          {
-            path: "/recurring-bills",
-            element: <ScreenPlaceholder title="Recurring Bills" />,
-          },
+          { path: "/recurring-bills", element: <RecurringBillsPage /> },
         ],
       },
     ],
