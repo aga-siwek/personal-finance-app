@@ -7,6 +7,7 @@ import Login from "@/features/auth/Login";
 import SignUp from "@/features/auth/SignUp";
 import OverviewPage from "@/features/overview/OverviewPage";
 import TransactionsPage from "@/features/transactions/TransactionsPage";
+import BudgetsPage from "@/features/budgets/BudgetsPage";
 
 /**
  * App routes. Public auth screens live under PublicRoute; the authenticated
@@ -30,7 +31,7 @@ export const router = createBrowserRouter([
         children: [
           { path: "/", element: <OverviewPage /> },
           { path: "/transactions", element: <TransactionsPage /> },
-          { path: "/budgets", element: <ScreenPlaceholder title="Budgets" /> },
+          { path: "/budgets", element: <BudgetsPage /> },
           { path: "/pots", element: <ScreenPlaceholder title="Pots" /> },
           {
             path: "/recurring-bills",
