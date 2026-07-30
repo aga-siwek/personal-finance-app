@@ -6,6 +6,7 @@ import AppShell from "@/components/layout/AppShell";
 import Login from "@/features/auth/Login";
 import SignUp from "@/features/auth/SignUp";
 import OverviewPage from "@/features/overview/OverviewPage";
+import TransactionsPage from "@/features/transactions/TransactionsPage";
 
 /**
  * App routes. Public auth screens live under PublicRoute; the authenticated
@@ -28,10 +29,7 @@ export const router = createBrowserRouter([
         element: <AppShell />,
         children: [
           { path: "/", element: <OverviewPage /> },
-          {
-            path: "/transactions",
-            element: <ScreenPlaceholder title="Transactions" />,
-          },
+          { path: "/transactions", element: <TransactionsPage /> },
           { path: "/budgets", element: <ScreenPlaceholder title="Budgets" /> },
           { path: "/pots", element: <ScreenPlaceholder title="Pots" /> },
           {

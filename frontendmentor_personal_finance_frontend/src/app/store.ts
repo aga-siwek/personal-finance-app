@@ -4,6 +4,7 @@ import authReducer from "@/features/auth/authSlice";
 import uiReducer from "@/features/ui/uiSlice";
 import overviewReducer from "@/features/overview/overviewSlice";
 import categoriesReducer from "@/features/categories/categoriesSlice";
+import transactionsReducer from "@/features/transactions/transactionsSlice";
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +12,7 @@ export const store = configureStore({
     ui: uiReducer,
     overview: overviewReducer,
     categories: categoriesReducer,
+    transactions: transactionsReducer,
   },
 });
 
