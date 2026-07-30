@@ -27,6 +27,15 @@ interface TransactionsResponse {
   total: number;
 }
 
+export interface TransactionInput {
+  recipient_name: string;
+  /** Signed integer cents: positive for income, negative for an expense. */
+  amount: number;
+  category_id: number;
+  /** ISO date, `YYYY-MM-DD`. */
+  transaction_date: string;
+}
+
 interface TransactionsState {
   items: TransactionDTO[];
   page: number;
@@ -65,6 +74,20 @@ export const fetchTransactions = createAsyncThunk<
     return response.data;
   } catch (err) {
     return rejectWithValue(getApiErrorMessage(err));
+  }
+});
+
+export const createTransaction = createAsyncThunk<
+  void,
+  TransactionInput,
+  { rejectValue: string }
+>("transactions/create", async (input, { rejectWithValue }) => {
+  try {
+    await api.post("/transactions", input);
+  } catch (err) {
+    return rejectWithValue(
+      getApiErrorMessage(err, "Could not add transaction."),
+    );
   }
 });
 

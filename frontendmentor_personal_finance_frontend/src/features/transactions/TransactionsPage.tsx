@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/app/store";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { fetchCategories } from "@/features/categories/categoriesSlice";
 import {
@@ -9,6 +10,7 @@ import {
 import TransactionsFilters from "@/features/transactions/components/TransactionsFilters";
 import TransactionsList from "@/features/transactions/components/TransactionsList";
 import Pagination from "@/features/transactions/components/Pagination";
+import AddTransactionDialog from "@/features/transactions/components/AddTransactionDialog";
 
 /**
  * Transactions screen (`/transactions`). Search (debounced), sort, and category
@@ -27,6 +29,10 @@ function TransactionsPage() {
   const [sort, setSort] = useState<TransactionSort>("latest");
   const [category, setCategory] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
+  const [addOpen, setAddOpen] = useState(false);
+  const [refreshToken, setRefreshToken] = useState(0);
+
+  const defaultCategoryId = categories.find((c) => c.name === "General")?.id;
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -53,13 +59,16 @@ function TransactionsPage() {
         category_id: category === "all" ? "all" : Number(category),
       }),
     );
-  }, [dispatch, currentPage, debouncedSearch, sort, category]);
+  }, [dispatch, currentPage, debouncedSearch, sort, category, refreshToken]);
 
   const totalPages = Math.ceil(total / per_page);
 
   return (
     <div>
-      <h1 className="text-[2rem] font-bold text-grey-900">Transactions</h1>
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-[2rem] font-bold text-grey-900">Transactions</h1>
+        <Button onClick={() => setAddOpen(true)}>+ Add Transaction</Button>
+      </div>
 
       <div className="mt-8 rounded-xl bg-card p-6 md:p-8">
         <TransactionsFilters
@@ -93,6 +102,17 @@ function TransactionsPage() {
           )}
         </div>
       </div>
+
+      <AddTransactionDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        categories={categories}
+        defaultCategoryId={defaultCategoryId}
+        onCreated={() => {
+          setCurrentPage(1);
+          setRefreshToken((n) => n + 1);
+        }}
+      />
     </div>
   );
 }
