@@ -1,5 +1,12 @@
 """Tests for GET /overview — aggregated dashboard payload."""
 
+from datetime import datetime, timezone
+
+# "unbudgeted" spend is derived from ``compute_spent``, which is bounded to the
+# current calendar month. Dating test transactions to *today* keeps these tests
+# from breaking at a month boundary.
+_TODAY = datetime.now(timezone.utc).date().isoformat()
+
 
 def _get_category_id(client, headers, name="Groceries"):
     resp = client.get("/categories", headers=headers)
@@ -25,6 +32,7 @@ def test_overview_empty_state(client, register_user):
     assert body["expenses"] == 0
     assert body["pots"]["total_count"] == 0
     assert body["budgets"]["total_count"] == 0
+    assert body["budgets"]["unbudgeted"] == []
     assert body["latest_transactions"] == []
     assert body["recurring_bills"] == {"paid": 0, "due_soon": 0, "upcoming": 0}
 
@@ -97,6 +105,99 @@ def test_overview_budgets_and_recurring_bills(client, register_user):
     assert len(body["budgets"]["top"]) == 1
     assert body["budgets"]["top"][0]["max_spend"] == 10000
     assert sum(body["recurring_bills"].values()) == 1
+
+
+def test_overview_unbudgeted_excludes_budgeted_category(client, register_user):
+    _, headers, _ = register_user()
+    budgeted_id = _get_category_id(client, headers, name="Groceries")
+    unbudgeted_id = _get_category_id(client, headers, name="Shopping")
+
+    client.post(
+        "/budgets",
+        json={"category_id": budgeted_id, "max_spend": 10000, "theme": "green"},
+        headers=headers,
+    )
+    # Spend in the budgeted category (must NOT show up under unbudgeted)...
+    client.post(
+        "/transactions",
+        json={
+            "category_id": budgeted_id,
+            "recipient_name": "Store",
+            "amount": -3000,
+            "transaction_date": _TODAY,
+        },
+        headers=headers,
+    )
+    # ...and spend in a category with no budget (must show up).
+    client.post(
+        "/transactions",
+        json={
+            "category_id": unbudgeted_id,
+            "recipient_name": "Mall",
+            "amount": -4500,
+            "transaction_date": _TODAY,
+        },
+        headers=headers,
+    )
+
+    body = client.get("/overview", headers=headers).get_json()
+    unbudgeted = body["budgets"]["unbudgeted"]
+    assert unbudgeted == [{"category_id": unbudgeted_id, "spent": 4500}]
+
+
+def test_overview_unbudgeted_ignores_income_only_category(client, register_user):
+    _, headers, _ = register_user()
+    category_id = _get_category_id(client, headers, name="Shopping")
+
+    # A category with no budget that only ever sees income (positive amounts)
+    # has spent == 0 and must not appear under unbudgeted.
+    client.post(
+        "/transactions",
+        json={
+            "category_id": category_id,
+            "recipient_name": "Refund",
+            "amount": 7000,
+            "transaction_date": _TODAY,
+        },
+        headers=headers,
+    )
+
+    body = client.get("/overview", headers=headers).get_json()
+    assert body["budgets"]["unbudgeted"] == []
+
+
+def test_overview_unbudgeted_sorted_and_capped(client, register_user):
+    _, headers, _ = register_user()
+    # Seven categories without budgets, each with distinct spend. The endpoint
+    # must return the top 5 (OVERVIEW_TOP_N), sorted by spent descending.
+    names = [
+        "Entertainment",
+        "Bills",
+        "Groceries",
+        "Dining Out",
+        "Transportation",
+        "Personal Care",
+        "Shopping",
+    ]
+    amounts = [1000, 7000, 3000, 6000, 2000, 5000, 4000]
+    for name, amount in zip(names, amounts):
+        category_id = _get_category_id(client, headers, name=name)
+        client.post(
+            "/transactions",
+            json={
+                "category_id": category_id,
+                "recipient_name": name,
+                "amount": -amount,
+                "transaction_date": _TODAY,
+            },
+            headers=headers,
+        )
+
+    body = client.get("/overview", headers=headers).get_json()
+    unbudgeted = body["budgets"]["unbudgeted"]
+    spends = [item["spent"] for item in unbudgeted]
+    assert len(unbudgeted) == 5
+    assert spends == [7000, 6000, 5000, 4000, 3000]
 
 
 def test_overview_isolated_per_user(client, register_user):

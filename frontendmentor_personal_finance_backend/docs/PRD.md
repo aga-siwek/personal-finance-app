@@ -161,6 +161,13 @@ functionality; naming will be reconciled when `CLAUDE.md` is next updated.)
   expenses, pot totals (all + top N), budget totals (all + top N with
   spent/limit), latest N transactions, recurring-bill summary counts. The
   frontend must not have to re-derive any of these from raw lists itself.
+- Budget totals also include an `unbudgeted` list: current-month spend for
+  categories the user has **no** budget for (the dashboard shows all
+  spending, labelling these "No budget"). Each entry is
+  `{ category_id, spent }` in integer minor units, using the *same*
+  current-month window as budgeted categories (via `compute_spent`, so the
+  two never drift onto different time bases); income-only categories
+  (`spent == 0`) are omitted. Sorted by `spent` descending, capped at top N.
 
 ## 6. Data model (summary)
 
