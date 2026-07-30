@@ -91,6 +91,34 @@ export const createTransaction = createAsyncThunk<
   }
 });
 
+export const updateTransaction = createAsyncThunk<
+  void,
+  { id: number } & TransactionInput,
+  { rejectValue: string }
+>("transactions/update", async ({ id, ...input }, { rejectWithValue }) => {
+  try {
+    await api.put(`/transactions/${id}`, input);
+  } catch (err) {
+    return rejectWithValue(
+      getApiErrorMessage(err, "Could not update transaction."),
+    );
+  }
+});
+
+export const deleteTransaction = createAsyncThunk<
+  void,
+  number,
+  { rejectValue: string }
+>("transactions/delete", async (id, { rejectWithValue }) => {
+  try {
+    await api.delete(`/transactions/${id}`);
+  } catch (err) {
+    return rejectWithValue(
+      getApiErrorMessage(err, "Could not delete transaction."),
+    );
+  }
+});
+
 const transactionsSlice = createSlice({
   name: "transactions",
   initialState,

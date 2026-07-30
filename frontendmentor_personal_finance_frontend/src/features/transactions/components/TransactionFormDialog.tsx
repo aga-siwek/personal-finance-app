@@ -23,8 +23,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { createTransaction } from "@/features/transactions/transactionsSlice";
-import type { CategoryDTO } from "@/types/api";
+import {
+  createTransaction,
+  updateTransaction,
+} from "@/features/transactions/transactionsSlice";
+import type { CategoryDTO, TransactionDTO } from "@/types/api";
 
 const schema = z.object({
   name: z
@@ -47,22 +50,28 @@ function today(): string {
 }
 
 /**
- * Add New Transaction modal. The Expense/Income toggle sets the sign of the
+ * Add/Edit transaction modal. The Expense/Income toggle sets the sign of the
  * amount (the API stores a single signed integer-cents value); dollars entered
- * are converted to cents. On success the parent refreshes the list.
+ * are converted to cents. In edit mode the fields prefill from the existing
+ * transaction (sign → type, absolute value → amount) and submit sends a PUT.
+ * On success the parent refreshes the list.
  */
-function AddTransactionDialog({
+function TransactionFormDialog({
   open,
   onOpenChange,
+  mode,
+  transaction,
   categories,
   defaultCategoryId,
-  onCreated,
+  onSaved,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  mode: "add" | "edit";
+  transaction?: TransactionDTO;
   categories: CategoryDTO[];
   defaultCategoryId?: number;
-  onCreated: () => void;
+  onSaved: () => void;
 }) {
   const dispatch = useAppDispatch();
   const {
@@ -82,7 +91,16 @@ function AddTransactionDialog({
   });
 
   useEffect(() => {
-    if (open) {
+    if (!open) return;
+    if (mode === "edit" && transaction) {
+      reset({
+        name: transaction.recipient_name,
+        type: transaction.amount < 0 ? "expense" : "income",
+        amount: (Math.abs(transaction.amount) / 100).toString(),
+        categoryId: String(transaction.category_id),
+        date: (transaction.transaction_date ?? today()).slice(0, 10),
+      });
+    } else {
       reset({
         name: "",
         type: "expense",
@@ -91,36 +109,44 @@ function AddTransactionDialog({
         date: today(),
       });
     }
-  }, [open, defaultCategoryId, reset]);
+  }, [open, mode, transaction, defaultCategoryId, reset]);
 
   const onSubmit = async (values: FormValues) => {
     const cents = Math.round(Number(values.amount) * 100);
     const signed = values.type === "expense" ? -cents : cents;
-    const result = await dispatch(
-      createTransaction({
-        recipient_name: values.name,
-        amount: signed,
-        category_id: Number(values.categoryId),
-        transaction_date: values.date,
-      }),
-    );
-    if (createTransaction.rejected.match(result)) {
+    const input = {
+      recipient_name: values.name,
+      amount: signed,
+      category_id: Number(values.categoryId),
+      transaction_date: values.date,
+    };
+    const result =
+      mode === "edit" && transaction
+        ? await dispatch(updateTransaction({ id: transaction.id, ...input }))
+        : await dispatch(createTransaction(input));
+    if (
+      createTransaction.rejected.match(result) ||
+      updateTransaction.rejected.match(result)
+    ) {
       toast.error(result.payload ?? "Something went wrong.");
       return;
     }
-    toast.success("Transaction added.");
+    toast.success(mode === "edit" ? "Transaction updated." : "Transaction added.");
     onOpenChange(false);
-    onCreated();
+    onSaved();
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Transaction</DialogTitle>
+          <DialogTitle>
+            {mode === "edit" ? "Edit Transaction" : "Add New Transaction"}
+          </DialogTitle>
           <DialogDescription>
-            Track a new transaction. Choose “Expense” or “Income” to record
-            either type.
+            {mode === "edit"
+              ? "Update the details of this transaction."
+              : "Track a new transaction. Choose “Expense” or “Income” to record either type."}
           </DialogDescription>
         </DialogHeader>
 
@@ -242,7 +268,13 @@ function AddTransactionDialog({
           </div>
 
           <Button type="submit" disabled={isSubmitting} className="h-13 w-full">
-            {isSubmitting ? <Spinner /> : "Add Transaction"}
+            {isSubmitting ? (
+              <Spinner />
+            ) : mode === "edit" ? (
+              "Save Changes"
+            ) : (
+              "Add Transaction"
+            )}
           </Button>
         </form>
       </DialogContent>
@@ -250,4 +282,4 @@ function AddTransactionDialog({
   );
 }
 
-export default AddTransactionDialog;
+export default TransactionFormDialog;

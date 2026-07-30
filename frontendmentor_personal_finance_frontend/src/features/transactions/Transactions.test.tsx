@@ -51,6 +51,8 @@ describe("TransactionsList", () => {
           tx({ id: 2, recipient_name: "Savory Bites Bistro", amount: -5550, category_id: 14 }),
         ]}
         categoryNames={categoryNames}
+        onEdit={() => {}}
+        onDelete={() => {}}
       />,
     );
     // Names appear twice (table + card layouts both render); use getAllByText.
@@ -61,7 +63,14 @@ describe("TransactionsList", () => {
   });
 
   it("shows an empty state when there are no transactions", () => {
-    renderWithProviders(<TransactionsList transactions={[]} categoryNames={{}} />);
+    renderWithProviders(
+      <TransactionsList
+        transactions={[]}
+        categoryNames={{}}
+        onEdit={() => {}}
+        onDelete={() => {}}
+      />,
+    );
     expect(screen.getByText("No transactions found.")).toBeInTheDocument();
   });
 });

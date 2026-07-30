@@ -20,6 +20,8 @@ export interface TransactionDTO {
   transaction_date: string | null;
   source: string;
   created_at: string;
+  /** ISO timestamp of the last edit, or null if never edited. */
+  updated_at?: string | null;
 }
 
 export interface PotDTO {

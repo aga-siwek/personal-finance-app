@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/app/store";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import ConfirmDeleteDialog from "@/components/common/ConfirmDeleteDialog";
 import { fetchCategories } from "@/features/categories/categoriesSlice";
 import {
+  deleteTransaction,
   fetchTransactions,
   type TransactionSort,
 } from "@/features/transactions/transactionsSlice";
 import TransactionsFilters from "@/features/transactions/components/TransactionsFilters";
 import TransactionsList from "@/features/transactions/components/TransactionsList";
 import Pagination from "@/features/transactions/components/Pagination";
-import AddTransactionDialog from "@/features/transactions/components/AddTransactionDialog";
+import TransactionFormDialog from "@/features/transactions/components/TransactionFormDialog";
+import type { TransactionDTO } from "@/types/api";
 
 /**
  * Transactions screen (`/transactions`). Search (debounced), sort, and category
@@ -30,9 +34,27 @@ function TransactionsPage() {
   const [category, setCategory] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [addOpen, setAddOpen] = useState(false);
+  const [editing, setEditing] = useState<TransactionDTO | null>(null);
+  const [deleting, setDeleting] = useState<TransactionDTO | null>(null);
+  const [deletingBusy, setDeletingBusy] = useState(false);
   const [refreshToken, setRefreshToken] = useState(0);
 
   const defaultCategoryId = categories.find((c) => c.name === "General")?.id;
+  const refresh = () => setRefreshToken((n) => n + 1);
+
+  const confirmDelete = async () => {
+    if (!deleting) return;
+    setDeletingBusy(true);
+    const result = await dispatch(deleteTransaction(deleting.id));
+    setDeletingBusy(false);
+    if (deleteTransaction.rejected.match(result)) {
+      toast.error(result.payload ?? "Could not delete transaction.");
+      return;
+    }
+    toast.success("Transaction deleted.");
+    setDeleting(null);
+    refresh();
+  };
 
   useEffect(() => {
     dispatch(fetchCategories());
@@ -92,7 +114,12 @@ function TransactionsPage() {
             </p>
           ) : (
             <>
-              <TransactionsList transactions={items} categoryNames={categoryNames} />
+              <TransactionsList
+                transactions={items}
+                categoryNames={categoryNames}
+                onEdit={(tx) => setEditing(tx)}
+                onDelete={(tx) => setDeleting(tx)}
+              />
               <Pagination
                 page={page}
                 totalPages={totalPages}
@@ -103,15 +130,34 @@ function TransactionsPage() {
         </div>
       </div>
 
-      <AddTransactionDialog
+      <TransactionFormDialog
         open={addOpen}
         onOpenChange={setAddOpen}
+        mode="add"
         categories={categories}
         defaultCategoryId={defaultCategoryId}
-        onCreated={() => {
+        onSaved={() => {
           setCurrentPage(1);
-          setRefreshToken((n) => n + 1);
+          refresh();
         }}
+      />
+
+      <TransactionFormDialog
+        open={editing !== null}
+        onOpenChange={(open) => !open && setEditing(null)}
+        mode="edit"
+        transaction={editing ?? undefined}
+        categories={categories}
+        onSaved={refresh}
+      />
+
+      <ConfirmDeleteDialog
+        open={deleting !== null}
+        onOpenChange={(open) => !open && setDeleting(null)}
+        title={`Delete '${deleting?.recipient_name ?? ""}'?`}
+        description="Are you sure you want to delete this transaction? This action cannot be reversed."
+        onConfirm={confirmDelete}
+        loading={deletingBusy}
       />
     </div>
   );
