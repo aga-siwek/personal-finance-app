@@ -1,6 +1,8 @@
 import { NavLink } from "react-router";
+import { LogOut } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/app/store";
 import { toggleSidebar } from "@/features/ui/uiSlice";
+import { fetchLogout } from "@/features/auth/authSlice";
 import { navItems } from "@/components/layout/navItems";
 import { MinimizeMenuIcon } from "@/components/icons/nav-icons";
 import Logo from "@/components/common/Logo";
@@ -65,6 +67,19 @@ function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      <button
+        type="button"
+        onClick={() => dispatch(fetchLogout())}
+        aria-label="Log out"
+        className={cn(
+          "group flex items-center gap-4 py-4 pl-8 text-base font-bold text-grey-300 transition-colors hover:text-white",
+          collapsed && "justify-center gap-0 pl-0",
+        )}
+      >
+        <LogOut className="size-5 shrink-0" aria-hidden="true" />
+        {!collapsed && <span>Logout</span>}
+      </button>
 
       <button
         type="button"

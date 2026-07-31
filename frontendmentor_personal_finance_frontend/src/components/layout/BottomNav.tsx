@@ -1,4 +1,7 @@
 import { NavLink } from "react-router";
+import { LogOut } from "lucide-react";
+import { useAppDispatch } from "@/app/store";
+import { fetchLogout } from "@/features/auth/authSlice";
 import { navItems } from "@/components/layout/navItems";
 import { cn } from "@/lib/utils";
 
@@ -8,6 +11,7 @@ import { cn } from "@/lib/utils";
  * active item gets a cream tab with a green top-border accent and green icon.
  */
 function BottomNav() {
+  const dispatch = useAppDispatch();
   return (
     <nav
       aria-label="Primary"
@@ -46,6 +50,16 @@ function BottomNav() {
           )}
         </NavLink>
       ))}
+
+      <button
+        type="button"
+        onClick={() => dispatch(fetchLogout())}
+        aria-label="Log out"
+        className="flex flex-1 flex-col items-center gap-1 border-t-4 border-transparent px-2 pt-2 pb-3 text-grey-300 md:pb-4"
+      >
+        <LogOut className="h-5 w-auto shrink-0" aria-hidden="true" />
+        <span className="hidden text-xs font-bold md:block">Logout</span>
+      </button>
     </nav>
   );
 }
